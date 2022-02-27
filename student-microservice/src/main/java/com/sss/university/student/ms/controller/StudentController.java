@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sss.university.student.ms.request.CreateStudentRequest;
+import com.sss.university.student.ms.response.AddressResponse;
 import com.sss.university.student.ms.response.StudentResponse;
 import com.sss.university.student.ms.service.StudentService;
 
@@ -31,4 +32,8 @@ public class StudentController {
 		return studentService.getById(id);
 	}
 	
+//	@GetMapping("/getByIdUsingWebClint/{id}")
+//	public AddressResponse getAddressById(@PathVariable long id) {
+//		return studentService.getAddressById(id);
+//	}
 }
