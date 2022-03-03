@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import com.sss.university.student.ms.entity.Student;
+import com.sss.university.student.ms.feignclients.AddressFeignClient;
 import com.sss.university.student.ms.repository.StudentRepository;
 import com.sss.university.student.ms.request.CreateStudentRequest;
 import com.sss.university.student.ms.response.AddressResponse;
@@ -26,6 +27,9 @@ public class StudentService {
 	
 	@Autowired
 	WebClient webClient;
+	
+	@Autowired
+	AddressFeignClient addressFeignClient; 
 
 
 	public StudentResponse createStudent(CreateStudentRequest createStudentRequest) {
@@ -45,25 +49,35 @@ public class StudentService {
 		student = studentRepository.save(student);
 
 		StudentResponse studentResponse = new StudentResponse(student);
-		studentResponse.setAddressResponse(getAddressById(student.getAddressId()));
+//		studentResponse.setAddressResponse(getAddressById(student.getAddressId()));
+		studentResponse.setAddressResponse(addressFeignClient.getById(student.getId()));
 		return studentResponse;
 	}
 	
 	public StudentResponse getById (long id) {
-		return new StudentResponse(studentRepository.findById(id).get());
+//		Student student = studentRepository.findById(id).get();
+		return getStudentByIdUsingFeignClient(id);
 	}
 	
-	public StudentResponse getStudentByIdUsingWebClient (long id) {
-		Student studentObject = studentRepository.findById(id).get();
-		StudentResponse studentResponse = new StudentResponse(studentObject);
-		studentResponse.setAddressResponse(getAddressById(id));
-		return studentResponse;
-	}
+//	public StudentResponse getStudentByIdUsingWebClient (long id) {
+//		Student studentObject = studentRepository.findById(id).get();
+//		StudentResponse studentResponse = new StudentResponse(studentObject);
+//		studentResponse.setAddressResponse(getAddressById(id));
+//		return studentResponse;
+//	}
 
 	//Intercommunication between services using Web-Client
-	public AddressResponse getAddressById(long addressId) {
-		Mono<AddressResponse> addressResponse = webClient.get().uri("/getById/"+addressId).retrieve().bodyToMono(AddressResponse.class);
-		return addressResponse.block();
+//	public AddressResponse getAddressById(long addressId) {
+//		Mono<AddressResponse> addressResponse = webClient.get().uri("/getById/"+addressId).retrieve().bodyToMono(AddressResponse.class);
+//		return addressResponse.block();
+//	}
+	
+	//Inter-Microservices Communication Using Feign Client
+	public StudentResponse getStudentByIdUsingFeignClient (long id) {
+		Student studentObject = studentRepository.findById(id).get();
+		StudentResponse studentResponse = new StudentResponse(studentObject);
+		studentResponse.setAddressResponse(addressFeignClient.getById(studentObject.getAddressId()));
+		return studentResponse;
 	}
 	
 }
